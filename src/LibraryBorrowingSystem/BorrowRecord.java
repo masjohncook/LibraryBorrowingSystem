@@ -16,11 +16,26 @@ package LibraryBorrowingSystem;
  *   - returned   : true if the book has been returned, false otherwise
  */
 public class BorrowRecord {
-    private String  recordId;
-    private Member  member;       // association -> Member
-    private Books   book;         // association -> Books
-    private String  borrowDate;
-    private String  returnDate;
+
+    // recordId is the unique ID for this transaction, e.g. "REC001"
+    private String recordId;
+
+    // member holds a reference to the Member who borrowed the book
+    // This is an association: BorrowRecord -> Member
+    private Member member;
+
+    // book holds a reference to the Books object that was borrowed
+    // This is an association: BorrowRecord -> Books
+    private Books book;
+
+    // borrowDate stores the date when the book was taken out
+    private String borrowDate;
+
+    // returnDate stores the date when the book was brought back
+    // Set to "-" by default until the book is actually returned
+    private String returnDate;
+
+    // returned is a flag: false means the book is still out, true means it has been returned
     private boolean returned;
 
     /**
@@ -33,62 +48,102 @@ public class BorrowRecord {
      * @param borrowDate the date the book is borrowed
      */
     public BorrowRecord(String recordId, Member member, Books book, String borrowDate) {
-        this.recordId   = recordId;
-        this.member     = member;
-        this.book       = book;
+        // Save the unique record ID
+        this.recordId = recordId;
+
+        // Save the reference to the member who is borrowing the book
+        this.member = member;
+
+        // Save the reference to the book being borrowed
+        this.book = book;
+
+        // Save the date the book was borrowed
         this.borrowDate = borrowDate;
+
+        // Set return date to "-" because the book has not been returned yet
         this.returnDate = "-";
-        this.returned   = false;
+
+        // Mark the record as not returned yet
+        this.returned = false;
     }
 
-    // Getters — allow other classes to read private attributes
+    // ── Getters ───────────────────────────────────────────────────────────────
+
 
     /** Returns the unique record ID. */
-    public String getRecordId() { return recordId; }
+    public String getRecordId() { 
+        return recordId; 
+    }
 
     /** Returns the member associated with this record. */
-    public Member getMember() { return member; }
+    public Member getMember() { 
+        return member; 
+    }
 
     /** Returns the book associated with this record. */
-    public Books getBook() { return book; }
+    public Books getBook() { 
+        return book; 
+    }
 
     /** Returns the date the book was borrowed. */
-    public String getBorrowDate() { return borrowDate; }
+    public String getBorrowDate() { 
+        return borrowDate; 
+    }
 
     /** Returns the date the book was returned, or "-" if not yet returned. */
-    public String getReturnDate() { return returnDate; }
+    public String getReturnDate() { 
+        return returnDate; 
+    }
 
     /** Returns true if the book has been returned. */
-    public boolean isReturned() { return returned; }
+    public boolean isReturned() { 
+        return returned; 
+    }
 
-    // Setters — allow controlled modification of private attributes
+    // ── Setters ───────────────────────────────────────────────────────────────
+
 
     /** Updates the record ID. */
-    public void setRecordId(String recordId) { this.recordId = recordId; }
+    public void setRecordId(String recordId) { 
+        this.recordId = recordId; 
+    }
 
     /** Updates the member linked to this record. */
-    public void setMember(Member member) { this.member = member; }
+    public void setMember(Member member) { 
+        this.member = member; 
+    }
 
     /** Updates the book linked to this record. */
-    public void setBook(Books book) { this.book = book; }
+    public void setBook(Books book) { 
+        this.book = book; 
+    }
 
     /** Updates the borrow date. */
-    public void setBorrowDate(String borrowDate) { this.borrowDate = borrowDate; }
+    public void setBorrowDate(String borrowDate) { 
+        this.borrowDate = borrowDate; 
+    }
 
     /** Updates the return date when the book is handed back. */
-    public void setReturnDate(String returnDate) { this.returnDate = returnDate; }
+    public void setReturnDate(String returnDate) { 
+        this.returnDate = returnDate; 
+    }
 
     /** Marks whether the book has been returned. */
-    public void setReturned(boolean returned) { this.returned = returned; }
+    public void setReturned(boolean returned) { 
+        this.returned = returned; 
+    }
 
     /**
-     * Returns a readable summary of this borrow record.
+     * Returns a readable summary of this borrow record as a single String.
+     * This is used whenever a BorrowRecord object is printed to the console.
      * Example: Record[REC001] Member: Alice | Book: 1984 | Borrowed: 2026-04-28 | Returned: -
      */
     public String toString() {
+        // Build a formatted string combining the record ID, member name,
+        // book title, borrow date, and return date into one readable line
         return "Record[" + recordId + "]"
-                + " Member: " + member.getName()
-                + " | Book: "     + book.getTitle()
+                + " Member: "    + member.getName()   // get the member's name via getter
+                + " | Book: "    + book.getTitle()     // get the book's title via getter
                 + " | Borrowed: " + borrowDate
                 + " | Returned: " + returnDate;
     }
