@@ -1,3 +1,12 @@
+/**
+ * @author      masjohncook
+ * @version     0.0.1
+ * @copyright   (C) Copyright 2026
+ * @license     None
+ * @maintainer  masjohncook
+ * @email       mas.john.cook@gmail.com
+ * @status      None
+ */
 package LibraryBorrowingSystem;
 
 /**
@@ -192,9 +201,9 @@ public class Member {
     }
 
     /** Returns the name of the member. */
-    public String getName() { 
-        return name; 
-        
+    public String getName() {
+        return name;
+    }
 
     /** Returns the array of books currently borrowed by this member. */
     public Books[] getBorrowedBooks() { 

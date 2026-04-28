@@ -1,4 +1,17 @@
+/**
+ * @author      masjohncook
+ * @version     0.0.1
+ * @copyright   (C) Copyright 2026
+ * @license     None
+ * @maintainer  masjohncook
+ * @email       mas.john.cook@gmail.com
+ * @status      None
+ */
 package LibraryBorrowingSystem;
+
+////////////////////////////////////////////////////////////////////////////
+// Import modules
+////////////////////////////////////////////////////////////////////////////
 
 // Import the Scanner class from java.util so we can read keyboard input
 import java.util.Scanner;
