@@ -39,6 +39,15 @@ public class main {
      */
     public static void main(String[] args) {
 
+        // Print program metadata when the application starts
+        System.out.println("============================================");
+        System.out.println("  Library Borrowing System");
+        System.out.println("============================================");
+        System.out.println("  Author      : masjohncook");
+        System.out.println("  Version     : 0.0.1");
+        System.out.println("  Copyright   : (C) Copyright 2026");
+        System.out.println("============================================\n");
+
         // Create a Scanner object to read input typed by the user on the keyboard
         Scanner sc = new Scanner(System.in);
 
