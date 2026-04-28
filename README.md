@@ -32,11 +32,15 @@ A simple console-based library management system written in Java. The system all
 
 ```
 LibraryBorrowingSystem/
-├── Books.java          # Represents a book; holds initial book data
-├── Member.java         # Represents a member; holds initial member data
-├── BorrowRecord.java   # Records a single borrow/return transaction
-├── Librarian.java      # Manages catalog, members, and borrow records
-├── main.java           # Entry point; runs the menu-driven interface
+├── src/
+│   └── LibraryBorrowingSystem/       # Package folder (matches package declaration)
+│       ├── Books.java                # Represents a book; holds initial book data
+│       ├── Member.java               # Represents a member; holds initial member data
+│       ├── BorrowRecord.java         # Records a single borrow/return transaction
+│       ├── Librarian.java            # Manages catalog, members, and borrow records
+│       └── main.java                 # Entry point; runs the menu-driven interface
+├── out/                              # Compiled .class files (gitignored)
+├── .gitignore
 └── README.md
 ```
 
@@ -143,13 +147,13 @@ The system starts with pre-loaded data defined inside each class:
 
 ### Compile
 ```bash
-cd /path/to/PycharmProjects
-javac LibraryBorrowingSystem/*.java
+cd /path/to/LibraryBorrowingSystem
+javac -d out src/LibraryBorrowingSystem/*.java
 ```
 
 ### Run
 ```bash
-java LibraryBorrowingSystem.main
+java -cp out LibraryBorrowingSystem.main
 ```
 
 ---
