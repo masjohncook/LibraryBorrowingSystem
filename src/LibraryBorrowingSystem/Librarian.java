@@ -11,125 +11,167 @@ package LibraryBorrowingSystem;
 
 /**
  * Represents the librarian who manages the library system.
+ * Inherits from Person — gains id and name.
  *
- * The Librarian is responsible for managing the book catalog and the list of
- * registered members. It also keeps a full record of all borrow and return
- * transactions. On creation, initial data is automatically loaded from the
- * Books and Member classes.
+ * The Librarian is responsible for managing the book catalog,
+ * the multimedia catalog, and the list of registered members.
+ * It also keeps a full record of all borrow and return transactions.
+ * On creation, initial data is automatically loaded from each class.
+ *
+ * Inheritance:
+ *   Librarian extends Person
+ *   - Inherits : id, name (and their getters/setters)
+ *   - Adds     : catalog[], multimedia[], members[], borrowRecords[]
+ *   - Overrides: getInfo(), toString()
+ *
+ * Overloading:
+ *   addBook(id, title, author, genre) — full version
+ *   addBook(id, title, author)        — genre defaults to "General"
+ *   addMultimedia(id, title, type, duration) — full version
+ *   addMultimedia(id, title, type)           — duration defaults to "Unknown"
  *
  * Associations:
  *   - catalog[]      : array of all Books in the library
+ *   - multimedia[]   : array of all Multimedia items in the library
  *   - members[]      : array of all registered Members
  *   - borrowRecords[]: array of all BorrowRecord transactions
- *
- * Attributes:
- *   - librarianId  : unique identifier for the librarian (e.g. "L001")
- *   - name         : full name of the librarian
- *   - catalogCount : number of books currently in the catalog
- *   - memberCount  : number of members currently registered
- *   - recordCount  : number of borrow records logged
  */
-public class Librarian {
+public class Librarian extends Person {
 
-    // librarianId is the unique code for this librarian, e.g. "L001"
-    private String librarianId;
-
-    // name stores the full name of the librarian
-    private String name;
-
-    // catalog is an array that holds all the Books in the library
-    // This is an association: Librarian -> Books[]
+    // catalog stores all Books objects in the library
+    // Association: Librarian -> Books[]
     private Books[] catalog;
 
-    // catalogCount tracks how many books are currently stored in the catalog array
+    // catalogCount tracks how many books are in the catalog array
     private int catalogCount;
 
-    // members is an array that holds all registered Member objects
-    // This is an association: Librarian -> Member[]
+    // multimedia stores all Multimedia objects in the library
+    // Association: Librarian -> Multimedia[]
+    private Multimedia[] multimedia;
+
+    // multimediaCount tracks how many multimedia items are in the array
+    private int multimediaCount;
+
+    // members stores all registered Member objects
+    // Association: Librarian -> Member[]
     private Member[] members;
 
-    // memberCount tracks how many members are currently registered
+    // memberCount tracks how many members are registered
     private int memberCount;
 
-    // borrowRecords stores every borrow and return transaction as a BorrowRecord
+    // borrowRecords stores every borrow/return transaction
     private BorrowRecord[] borrowRecords;
 
-    // recordCount tracks how many borrow records have been created so far
+    // recordCount tracks how many borrow records have been created
     private int recordCount;
 
-    // Maximum number of books the catalog array can hold
-    private static final int MAX_BOOKS = 100;
-
-    // Maximum number of members the members array can hold
-    private static final int MAX_MEMBERS = 50;
-
-    // Maximum number of borrow records the borrowRecords array can hold
-    private static final int MAX_RECORDS = 200;
+    // Maximum sizes for each array
+    private static final int MAX_BOOKS      = 100;
+    private static final int MAX_MULTIMEDIA = 50;
+    private static final int MAX_MEMBERS    = 50;
+    private static final int MAX_RECORDS    = 200;
 
     /**
-     * Creates a new Librarian and automatically loads the initial
-     * book and member data from their respective classes.
+     * Creates a new Librarian and automatically loads initial data
+     * from the Books, Multimedia, and Member classes.
+     * Calls the Person constructor (super) to set id and name.
      *
-     * @param librarianId unique identifier for the librarian
+     * @param librarianId unique identifier for the librarian (e.g. "L001")
      * @param name        full name of the librarian
      */
     public Librarian(String librarianId, String name) {
-        // Save the librarian's unique ID
-        this.librarianId = librarianId;
+        // Call the parent Person constructor to set this.id and this.name
+        super(librarianId, name);
 
-        // Save the librarian's name
-        this.name = name;
-
-        // Initialize the catalog array with MAX_BOOKS empty slots
+        // Initialize the books catalog array with MAX_BOOKS empty slots
         this.catalog = new Books[MAX_BOOKS];
-
-        // No books have been added yet, so the count starts at 0
         this.catalogCount = 0;
+
+        // Initialize the multimedia array with MAX_MULTIMEDIA empty slots
+        this.multimedia = new Multimedia[MAX_MULTIMEDIA];
+        this.multimediaCount = 0;
 
         // Initialize the members array with MAX_MEMBERS empty slots
         this.members = new Member[MAX_MEMBERS];
-
-        // No members registered yet, so the count starts at 0
         this.memberCount = 0;
 
         // Initialize the borrow records array with MAX_RECORDS empty slots
         this.borrowRecords = new BorrowRecord[MAX_RECORDS];
-
-        // No records have been created yet, so the count starts at 0
         this.recordCount = 0;
 
-        // Call the helper method to fill the arrays with starting data
+        // Load all initial data from each class
         loadInitialData();
     }
 
     /**
-     * Loads the starting data by calling getInitialBooks() from the Books class
-     * and getInitialMembers() from the Member class.
-     * Each class is responsible for defining its own default data.
+     * Loads the starting data from each class.
+     * Books, Multimedia, and Member each own their default data.
      */
     private void loadInitialData() {
         // Ask the Books class for its pre-defined list of starting books
         Books[] initialBooks = Books.getInitialBooks();
-
-        // Loop through the returned array and copy each book into the catalog
         for (int i = 0; i < initialBooks.length; i++) {
-            catalog[catalogCount++] = initialBooks[i]; // add book and increase count
+            catalog[catalogCount++] = initialBooks[i];
+        }
+
+        // Ask the Multimedia class for its pre-defined list of starting items
+        Multimedia[] initialMultimedia = Multimedia.getInitialMultimedia();
+        for (int i = 0; i < initialMultimedia.length; i++) {
+            multimedia[multimediaCount++] = initialMultimedia[i];
         }
 
         // Ask the Member class for its pre-defined list of starting members
         Member[] initialMembers = Member.getInitialMembers();
-
-        // Loop through the returned array and copy each member into the members array
         for (int i = 0; i < initialMembers.length; i++) {
-            members[memberCount++] = initialMembers[i]; // add member and increase count
+            members[memberCount++] = initialMembers[i];
         }
     }
 
     // ── Book CRUD ─────────────────────────────────────────────────────────────
 
     /**
-     * Adds a new book to the library catalog.
+     * OVERLOADED METHOD (with genre) —
+     * Adds a new book to the library catalog with all details provided.
      * Fails if the catalog is full or the book ID already exists.
+     * This is the FULL version of addBook — all 4 fields are required.
+     *
+     * @param bookId unique ID for the new book
+     * @param title  title of the new book
+     * @param author author of the new book
+     * @param genre  genre/category of the new book
+     * @return the created Books object, or null if the operation failed
+     */
+    public Books addBook(String bookId, String title, String author, String genre) {
+        // Check if the catalog has reached its maximum capacity
+        if (catalogCount >= MAX_BOOKS) {
+            System.out.println("  [FAILED] Catalog is full.");
+            return null;
+        }
+
+        // Check if a book with the same ID already exists
+        if (findBookById(bookId) != null) {
+            System.out.println("  [FAILED] Book ID \"" + bookId + "\" already exists.");
+            return null;
+        }
+
+        // Create the new Books object with all 4 details
+        Books book = new Books(bookId, title, author, genre);
+
+        // Add the book to the next open slot and increase the count
+        catalog[catalogCount++] = book;
+        System.out.println("  [ADDED] " + book);
+        return book;
+    }
+
+    /**
+     * OVERLOADED METHOD (without genre) —
+     * Adds a new book using only 3 fields; genre defaults to "General".
+     * This is the SHORT version of addBook — only ID, title, and author are needed.
+     * Internally it calls the full 4-argument version with "General" as the genre.
+     *
+     * This method has the SAME name as the one above but FEWER parameters.
+     * Java chooses which version to call based on how many arguments are passed.
+     * This is called METHOD OVERLOADING.
      *
      * @param bookId unique ID for the new book
      * @param title  title of the new book
@@ -137,36 +179,13 @@ public class Librarian {
      * @return the created Books object, or null if the operation failed
      */
     public Books addBook(String bookId, String title, String author) {
-        // Check if the catalog has reached its maximum capacity
-        if (catalogCount >= MAX_BOOKS) {
-            System.out.println("  [FAILED] Catalog is full.");
-            return null; // Stop here and report failure
-        }
-
-        // Check if a book with the same ID already exists to prevent duplicates
-        if (findBookById(bookId) != null) {
-            System.out.println("  [FAILED] Book ID \"" + bookId + "\" already exists.");
-            return null; // Stop here and report failure
-        }
-
-        // Create a new Books object with the provided details
-        Books book = new Books(bookId, title, author);
-
-        // Add the new book to the next available slot in the catalog array
-        // catalogCount++ places the book at index catalogCount, then increases it by 1
-        catalog[catalogCount++] = book;
-
-        // Print a confirmation message showing the book that was added
-        System.out.println("  [ADDED] " + book);
-
-        // Return the newly created book object
-        return book;
+        // Call the full 4-argument version with a default genre of "General"
+        return addBook(bookId, title, author, "General");
     }
 
     /**
      * Removes a book from the catalog by its ID.
      * Fails if the book is not found or is currently borrowed.
-     * Shifts the remaining entries left to fill the gap.
      *
      * @param bookId the ID of the book to remove
      * @return true if removed successfully, false otherwise
@@ -176,79 +195,218 @@ public class Librarian {
         for (int i = 0; i < catalogCount; i++) {
             if (catalog[i].getBookId().equals(bookId)) {
 
-                // Prevent removing a book that is currently borrowed by a member
+                // Prevent removing a book that is currently borrowed
                 if (!catalog[i].isAvailable()) {
                     System.out.println("  [FAILED] Cannot remove a book that is currently borrowed.");
-                    return false; // Stop here and report failure
+                    return false;
                 }
 
-                // Shift all entries after index i one position to the left
-                // This closes the gap left by the removed book
+                // Shift all entries after index i one position to the left to close the gap
                 for (int j = i; j < catalogCount - 1; j++) {
                     catalog[j] = catalog[j + 1];
                 }
 
-                // Decrease the count first (--catalogCount), then clear the last slot
+                // Decrease the count and clear the last slot
                 catalog[--catalogCount] = null;
-
-                // Print a confirmation message
                 System.out.println("  [REMOVED] Book ID \"" + bookId + "\" removed from catalog.");
-                return true; // Report success
+                return true;
             }
         }
-
-        // If the loop finishes without finding the book, report failure
         System.out.println("  [FAILED] Book ID \"" + bookId + "\" not found.");
         return false;
     }
 
     /**
-     * Updates the title and/or author of an existing book.
+     * Updates the title, author, and/or genre of an existing book.
      * Fields left blank (empty string) are not changed.
-     * Fails if the book ID is not found in the catalog.
      *
      * @param bookId    the ID of the book to update
      * @param newTitle  new title (leave empty to keep current)
      * @param newAuthor new author (leave empty to keep current)
+     * @param newGenre  new genre (leave empty to keep current)
      * @return true if updated successfully, false otherwise
      */
-    public boolean updateBook(String bookId, String newTitle, String newAuthor) {
-        // Search for the book by its ID using the helper method
+    public boolean updateBook(String bookId, String newTitle, String newAuthor, String newGenre) {
+        // Search for the book by its ID
         Books book = findBookById(bookId);
-
-        // If the book was not found, report failure
         if (book == null) {
             System.out.println("  [FAILED] Book ID \"" + bookId + "\" not found.");
             return false;
         }
 
-        // Only update the title if the user provided a non-blank new title
-        // trim() removes any leading or trailing spaces from the input
-        if (!newTitle.trim().isEmpty()) book.setTitle(newTitle.trim());
-
-        // Only update the author if the user provided a non-blank new author
+        // Only update each field if the user provided a non-blank value
+        if (!newTitle.trim().isEmpty())  book.setTitle(newTitle.trim());
         if (!newAuthor.trim().isEmpty()) book.setAuthor(newAuthor.trim());
+        if (!newGenre.trim().isEmpty())  book.setGenre(newGenre.trim());
 
-        // Print a confirmation showing the book's updated details
         System.out.println("  [UPDATED] " + book);
-        return true; // Report success
+        return true;
     }
 
     /**
-     * Searches the catalog for a book by its ID.
+     * Searches the books catalog for a book by its ID.
      *
      * @param bookId the book ID to look for
      * @return the matching Books object, or null if not found
      */
     public Books findBookById(String bookId) {
-        // Loop through all books in the catalog
         for (int i = 0; i < catalogCount; i++) {
-            // Compare each book's ID with the one we are looking for
             if (catalog[i].getBookId().equals(bookId)) {
-                return catalog[i]; // Found — return the book immediately
+                return catalog[i]; // Found — return immediately
             }
         }
-        // Reached the end without finding a match — return null
+        return null; // Not found
+    }
+
+    // ── Multimedia CRUD ───────────────────────────────────────────────────────
+
+    /**
+     * OVERLOADED METHOD (with duration) —
+     * Adds a new multimedia item with all details provided.
+     * This is the FULL version of addMultimedia — all 4 fields are required.
+     *
+     * @param itemId   unique ID for the multimedia item (e.g. "MM004")
+     * @param title    title of the multimedia item
+     * @param type     format type (e.g. "DVD", "CD", "Audiobook")
+     * @param duration running time or length (e.g. "120 min")
+     * @return the created Multimedia object, or null if the operation failed
+     */
+    public Multimedia addMultimedia(String itemId, String title, String type, String duration) {
+        // Check if the multimedia array has reached its maximum capacity
+        if (multimediaCount >= MAX_MULTIMEDIA) {
+            System.out.println("  [FAILED] Multimedia catalog is full.");
+            return null;
+        }
+
+        // Check if a multimedia item with the same ID already exists
+        if (findMultimediaById(itemId) != null) {
+            System.out.println("  [FAILED] Item ID \"" + itemId + "\" already exists.");
+            return null;
+        }
+
+        // Create the new Multimedia object with all 4 details
+        Multimedia item = new Multimedia(itemId, title, type, duration);
+
+        // Add it to the next open slot and increase the count
+        multimedia[multimediaCount++] = item;
+        System.out.println("  [ADDED] " + item);
+        return item;
+    }
+
+    /**
+     * OVERLOADED METHOD (without duration) —
+     * Adds a new multimedia item using only 3 fields; duration defaults to "Unknown".
+     * Internally calls the full 4-argument version with "Unknown" as the duration.
+     *
+     * This method has the SAME name as the one above but FEWER parameters.
+     * This is METHOD OVERLOADING — Java picks the right version based on argument count.
+     *
+     * @param itemId unique ID for the multimedia item
+     * @param title  title of the multimedia item
+     * @param type   format type (e.g. "DVD", "CD", "Audiobook")
+     * @return the created Multimedia object, or null if the operation failed
+     */
+    public Multimedia addMultimedia(String itemId, String title, String type) {
+        // Call the full 4-argument version with a default duration of "Unknown"
+        return addMultimedia(itemId, title, type, "Unknown");
+    }
+
+    /**
+     * Removes a multimedia item by its ID.
+     * Fails if the item is not found or is currently borrowed.
+     *
+     * @param itemId the ID of the multimedia item to remove
+     * @return true if removed successfully, false otherwise
+     */
+    public boolean removeMultimedia(String itemId) {
+        // Loop through the multimedia array to find the item with the matching ID
+        for (int i = 0; i < multimediaCount; i++) {
+            if (multimedia[i].getItemId().equals(itemId)) {
+
+                // Prevent removing an item that is currently borrowed
+                if (!multimedia[i].isAvailable()) {
+                    System.out.println("  [FAILED] Cannot remove an item that is currently borrowed.");
+                    return false;
+                }
+
+                // Shift all entries after index i one position to the left to close the gap
+                for (int j = i; j < multimediaCount - 1; j++) {
+                    multimedia[j] = multimedia[j + 1];
+                }
+
+                // Decrease the count and clear the last slot
+                multimedia[--multimediaCount] = null;
+                System.out.println("  [REMOVED] Item ID \"" + itemId + "\" removed from multimedia catalog.");
+                return true;
+            }
+        }
+        System.out.println("  [FAILED] Item ID \"" + itemId + "\" not found.");
+        return false;
+    }
+
+    /**
+     * Updates the title, type, and/or duration of an existing multimedia item.
+     * Fields left blank (empty string) are not changed.
+     *
+     * @param itemId      the ID of the item to update
+     * @param newTitle    new title (leave empty to keep current)
+     * @param newType     new type (leave empty to keep current)
+     * @param newDuration new duration (leave empty to keep current)
+     * @return true if updated successfully, false otherwise
+     */
+    public boolean updateMultimedia(String itemId, String newTitle, String newType, String newDuration) {
+        // Search for the multimedia item by its ID
+        Multimedia item = findMultimediaById(itemId);
+        if (item == null) {
+            System.out.println("  [FAILED] Item ID \"" + itemId + "\" not found.");
+            return false;
+        }
+
+        // Only update each field if the user provided a non-blank value
+        if (!newTitle.trim().isEmpty())    item.setTitle(newTitle.trim());
+        if (!newType.trim().isEmpty())     item.setType(newType.trim());
+        if (!newDuration.trim().isEmpty()) item.setDuration(newDuration.trim());
+
+        System.out.println("  [UPDATED] " + item);
+        return true;
+    }
+
+    /**
+     * Searches the multimedia array for an item by its ID.
+     *
+     * @param itemId the item ID to look for
+     * @return the matching Multimedia object, or null if not found
+     */
+    public Multimedia findMultimediaById(String itemId) {
+        for (int i = 0; i < multimediaCount; i++) {
+            if (multimedia[i].getItemId().equals(itemId)) {
+                return multimedia[i]; // Found — return immediately
+            }
+        }
+        return null; // Not found
+    }
+
+    /**
+     * Searches both the books catalog and the multimedia array for an item by ID.
+     * Returns a LibraryItem so it works for both Books and Multimedia.
+     *
+     * @param itemId the ID to search for in both catalogs
+     * @return the matching LibraryItem (Books or Multimedia), or null if not found
+     */
+    public LibraryItem findItemById(String itemId) {
+        // Check the books catalog first
+        Books book = findBookById(itemId);
+        if (book != null) {
+            return book; // Found in books catalog — return it
+        }
+
+        // Check the multimedia catalog next
+        Multimedia item = findMultimediaById(itemId);
+        if (item != null) {
+            return item; // Found in multimedia catalog — return it
+        }
+
+        // Not found in either catalog
         return null;
     }
 
@@ -263,67 +421,46 @@ public class Librarian {
      * @return the created Member object, or null if the operation failed
      */
     public Member registerMember(String memberId, String name) {
-        // Check if the members array has reached its maximum capacity
         if (memberCount >= MAX_MEMBERS) {
             System.out.println("  [FAILED] Member limit reached.");
-            return null; // Stop here and report failure
+            return null;
         }
-
-        // Check if a member with the same ID already exists to prevent duplicates
         if (findMemberById(memberId) != null) {
             System.out.println("  [FAILED] Member ID \"" + memberId + "\" already exists.");
-            return null; // Stop here and report failure
+            return null;
         }
-
-        // Create a new Member object with the given ID and name
         Member member = new Member(memberId, name);
-
-        // Add the new member to the next available slot in the members array
-        // memberCount++ places the member at index memberCount, then increases it by 1
         members[memberCount++] = member;
-
-        // Print a confirmation message
         System.out.println("  [REGISTERED] " + member);
-
-        // Return the newly created member object
         return member;
     }
 
     /**
      * Removes a member from the system by their ID.
-     * Fails if the member still has borrowed books or is not found.
-     * Shifts the remaining entries left to fill the gap.
+     * Fails if the member still has borrowed items or is not found.
      *
      * @param memberId the ID of the member to remove
      * @return true if removed successfully, false otherwise
      */
     public boolean removeMember(String memberId) {
-        // Loop through the members array to find the one with the matching ID
         for (int i = 0; i < memberCount; i++) {
             if (members[i].getMemberId().equals(memberId)) {
 
-                // Do not allow removal if the member still has books checked out
+                // Do not remove a member who still has items checked out
                 if (members[i].getBorrowCount() > 0) {
-                    System.out.println("  [FAILED] Cannot remove a member who still has borrowed books.");
-                    return false; // Stop here and report failure
+                    System.out.println("  [FAILED] Cannot remove a member who still has borrowed items.");
+                    return false;
                 }
 
-                // Shift all entries after index i one position to the left
-                // This closes the gap left by the removed member
+                // Shift entries left to close the gap
                 for (int j = i; j < memberCount - 1; j++) {
                     members[j] = members[j + 1];
                 }
-
-                // Decrease the count first (--memberCount), then clear the last slot
                 members[--memberCount] = null;
-
-                // Print a confirmation message
                 System.out.println("  [REMOVED] Member ID \"" + memberId + "\" removed.");
-                return true; // Report success
+                return true;
             }
         }
-
-        // If the loop finishes without finding the member, report failure
         System.out.println("  [FAILED] Member ID \"" + memberId + "\" not found.");
         return false;
     }
@@ -337,26 +474,16 @@ public class Librarian {
      * @return true if updated successfully, false otherwise
      */
     public boolean updateMember(String memberId, String newName) {
-        // Search for the member by their ID using the helper method
         Member member = findMemberById(memberId);
-
-        // If the member was not found, report failure
         if (member == null) {
             System.out.println("  [FAILED] Member ID \"" + memberId + "\" not found.");
             return false;
         }
-
-        // Only update if the new name is not blank
         if (!newName.trim().isEmpty()) {
-            // Update the member's name using the setter
             member.setName(newName.trim());
-
-            // Print a confirmation showing the updated member details
             System.out.println("  [UPDATED] " + member);
-            return true; // Report success
+            return true;
         }
-
-        // If the new name was blank, report failure
         System.out.println("  [FAILED] New name cannot be empty.");
         return false;
     }
@@ -368,170 +495,184 @@ public class Librarian {
      * @return the matching Member object, or null if not found
      */
     public Member findMemberById(String memberId) {
-        // Loop through all registered members
         for (int i = 0; i < memberCount; i++) {
-            // Compare each member's ID with the one we are looking for
             if (members[i].getMemberId().equals(memberId)) {
-                return members[i]; // Found — return the member immediately
+                return members[i]; // Found — return immediately
             }
         }
-        // Reached the end without finding a match — return null
-        return null;
+        return null; // Not found
     }
 
     // ── Borrow Record Management ──────────────────────────────────────────────
 
     /**
-     * Creates and stores a new borrow record when a member borrows a book.
-     * Record IDs are generated automatically (e.g. REC001, REC002, ...).
+     * Creates and stores a new borrow record.
+     * Accepts any LibraryItem (Books or Multimedia).
      *
      * @param member the member who is borrowing
-     * @param book   the book being borrowed
+     * @param item   the LibraryItem being borrowed
      */
-    public void recordBorrow(Member member, Books book) {
-        // If the records array is full, silently stop — no more records can be added
+    public void recordBorrow(Member member, LibraryItem item) {
         if (recordCount >= MAX_RECORDS) return;
-
-        // Generate a record ID by padding the record number with leading zeros
-        // e.g. recordCount=0 produces "REC001", recordCount=1 produces "REC002"
+        // Generate a record ID padded with leading zeros e.g. "REC001"
         String recordId = "REC" + String.format("%03d", recordCount + 1);
-
-        // Create a new BorrowRecord and store it in the next available slot
-        // recordCount++ adds the record at index recordCount, then increases it by 1
-        borrowRecords[recordCount++] = new BorrowRecord(recordId, member, book, "2026-04-28");
+        borrowRecords[recordCount++] = new BorrowRecord(recordId, member, item, "2026-04-29");
     }
 
     /**
-     * Marks the open borrow record as returned by setting the return date
-     * and flipping the returned flag to true.
-     * Searches for the most recent open record matching the member and book.
+     * Marks the open borrow record as returned.
+     * Searches for the first open record matching the member and item.
      *
-     * @param member the member who is returning the book
-     * @param book   the book being returned
+     * @param member the member who is returning the item
+     * @param item   the LibraryItem being returned
      */
-    public void recordReturn(Member member, Books book) {
-        // Loop through all borrow records to find the right open record
+    public void recordReturn(Member member, LibraryItem item) {
         for (int i = 0; i < recordCount; i++) {
             BorrowRecord r = borrowRecords[i];
 
-            // Look for a record that:
-            // 1. Has not been marked as returned yet (!r.isReturned())
-            // 2. Belongs to the same member (matching member ID)
-            // 3. Is for the same book (matching book ID)
+            // Find a record that: is not returned, matches the member ID, and matches the item ID
             if (!r.isReturned()
                     && r.getMember().getMemberId().equals(member.getMemberId())
-                    && r.getBook().getBookId().equals(book.getBookId())) {
-
-                // Set the return date on the record
-                r.setReturnDate("2026-04-28");
-
-                // Mark the record as returned
+                    && r.getItem().getItemId().equals(item.getItemId())) {
+                r.setReturnDate("2026-04-29");
                 r.setReturned(true);
-
-                // Stop searching — we only need to update the first matching open record
-                return;
+                return; // Stop after updating the first matching open record
             }
         }
     }
 
     // ── Display Helpers ───────────────────────────────────────────────────────
 
-    /**
-     * Prints all books currently in the catalog to the console,
-     * along with their availability status.
-     */
+    /** Prints all books in the catalog with their availability status. */
     public void displayCatalog() {
-        // Print a header showing how many books are in the catalog
         System.out.println("  ---- Book Catalog (" + catalogCount + " book(s)) ----");
-
-        // If there are no books, print a placeholder message
         if (catalogCount == 0) {
             System.out.println("  (empty)");
         } else {
-            // Loop through all books and print each one using its toString() method
             for (int i = 0; i < catalogCount; i++) {
                 System.out.println("  " + catalog[i]);
             }
         }
     }
 
-    /**
-     * Prints all registered members to the console,
-     * along with how many books each is currently borrowing.
-     */
-    public void displayMembers() {
-        // Print a header showing how many members are registered
-        System.out.println("  ---- Registered Members (" + memberCount + " member(s)) ----");
+    /** Prints all multimedia items with their availability status. */
+    public void displayMultimedia() {
+        System.out.println("  ---- Multimedia Catalog (" + multimediaCount + " item(s)) ----");
+        if (multimediaCount == 0) {
+            System.out.println("  (empty)");
+        } else {
+            for (int i = 0; i < multimediaCount; i++) {
+                System.out.println("  " + multimedia[i]);
+            }
+        }
+    }
 
-        // If there are no members, print a placeholder message
+    /** Prints both books and multimedia catalogs together. */
+    public void displayAllItems() {
+        displayCatalog();
+        displayMultimedia();
+    }
+
+    /** Prints all registered members and their borrow counts. */
+    public void displayMembers() {
+        System.out.println("  ---- Registered Members (" + memberCount + " member(s)) ----");
         if (memberCount == 0) {
             System.out.println("  (empty)");
         } else {
-            // Loop through all members and print each one using its toString() method
             for (int i = 0; i < memberCount; i++) {
                 System.out.println("  " + members[i]);
             }
         }
     }
 
-    /**
-     * Prints all borrow records to the console, including returned ones.
-     */
+    /** Prints all borrow records including returned ones. */
     public void displayAllRecords() {
-        // Print a header showing how many records exist in total
         System.out.println("  ---- Borrow Records (" + recordCount + " total) ----");
-
-        // If no records exist yet, print a placeholder message
         if (recordCount == 0) {
             System.out.println("  (none yet)");
         } else {
-            // Loop through all records and print each one using its toString() method
             for (int i = 0; i < recordCount; i++) {
                 System.out.println("  " + borrowRecords[i]);
             }
         }
     }
 
+    /**
+     * Returns a combined array of all LibraryItems (books + multimedia).
+     * Used by Member.searchItem() which needs a single array to search through.
+     *
+     * @return a LibraryItem array containing all books followed by all multimedia items
+     */
+    public LibraryItem[] getAllItems() {
+        // Create a new array big enough to hold all books and all multimedia
+        LibraryItem[] all = new LibraryItem[catalogCount + multimediaCount];
+
+        // Copy all books into the first part of the combined array
+        for (int i = 0; i < catalogCount; i++) {
+            all[i] = catalog[i];
+        }
+
+        // Copy all multimedia into the second part of the combined array
+        for (int i = 0; i < multimediaCount; i++) {
+            all[catalogCount + i] = multimedia[i];
+        }
+
+        return all;
+    }
+
+    /** Returns the total number of items (books + multimedia) in the library. */
+    public int getAllItemsCount() {
+        return catalogCount + multimediaCount;
+    }
+
+    /**
+     * Returns a detailed description of this librarian.
+     * OVERRIDES the base getInfo() in Person with librarian-specific details.
+     *
+     * @return a formatted string with librarian ID and name
+     */
+    public String getInfo() {
+        // id and name are accessed directly because they are protected in Person
+        return "Librarian[" + id + "] " + name;
+    }
+
+    /**
+     * Returns a readable summary of this librarian.
+     * Calls the overridden getInfo() from this class.
+     */
+    public String toString() {
+        return getInfo();
+    }
+
     // ── Getters & Setters ─────────────────────────────────────────────────────
 
-
-    /** Returns the librarian's unique ID. */
-    public String getLibrarianId() { return librarianId; }
+    /** Returns the librarian's ID. Delegates to Person's id field. */
+    public String getLibrarianId() { return id; }
 
     /** Updates the librarian's ID. */
-    public void setLibrarianId(String librarianId) { this.librarianId = librarianId; }
+    public void setLibrarianId(String librarianId) { this.id = librarianId; }
 
-    /** Returns the librarian's name. */
-    public String getName() { return name; }
-
-    /** Updates the librarian's name. */
-    public void setName(String name) { this.name = name; }
-
-    /** Returns the full book catalog array. */
+    /** Returns the books catalog array. */
     public Books[] getCatalog() { return catalog; }
 
     /** Returns the number of books in the catalog. */
     public int getCatalogCount() { return catalogCount; }
 
-    /** Returns the full members array. */
+    /** Returns the multimedia array. */
+    public Multimedia[] getMultimedia() { return multimedia; }
+
+    /** Returns the number of multimedia items. */
+    public int getMultimediaCount() { return multimediaCount; }
+
+    /** Returns the members array. */
     public Member[] getMembers() { return members; }
 
     /** Returns the number of registered members. */
     public int getMemberCount() { return memberCount; }
 
-    /** Returns the full borrow records array. */
+    /** Returns the borrow records array. */
     public BorrowRecord[] getBorrowRecords() { return borrowRecords; }
 
     /** Returns the total number of borrow records logged. */
     public int getRecordCount() { return recordCount; }
-
-    /**
-     * Returns a readable summary of this librarian as a single String.
-     * This is used whenever a Librarian object is printed to the console.
-     * Example output: Librarian[L001] Mrs. Smith
-     */
-    public String toString() {
-        // Build a formatted string showing the librarian ID and name
-        return "Librarian[" + librarianId + "] " + name;
-    }
 }

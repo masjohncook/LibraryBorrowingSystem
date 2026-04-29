@@ -11,58 +11,53 @@ package LibraryBorrowingSystem;
 
 /**
  * Represents a book in the library collection.
+ * Inherits from LibraryItem — gains itemId, title, and available.
  *
- * This class stores the details of a single book including its ID, title,
- * author, and availability status. It also provides the initial book data
- * used to pre-populate the library catalog on startup.
+ * A Books object is a specific type of LibraryItem that adds
+ * two extra attributes: the author and the genre of the book.
+ * It also provides the initial book data used at system startup.
+ *
+ * Inheritance:
+ *   Books extends LibraryItem
+ *   - Inherits : itemId, title, available (and their getters/setters)
+ *   - Adds     : author, genre
+ *   - Overrides: getInfo(), toString()
  *
  * Attributes:
- *   - bookId    : unique identifier for the book (e.g. "B001")
- *   - title     : the title of the book
- *   - author    : the name of the book's author
- *   - available : true if the book is on the shelf, false if it is borrowed
+ *   - author : the name of the book's author
+ *   - genre  : the category of the book (e.g. "Novel", "Sci-Fi", "Classic")
  */
-public class Books {
+public class Books extends LibraryItem {
 
-    // bookId stores the unique code for this book, e.g. "B001"
-    // private means only this class can access it directly
-    private String bookId;
-
-    // title stores the full title of the book
-    private String title;
-
-    // author stores the name of the person who wrote the book
+    // author stores the name of who wrote this book
     private String author;
 
-    // available tracks whether the book is on the shelf (true) or borrowed (false)
-    private boolean available;
+    // genre stores the category of this book, e.g. "Novel", "Sci-Fi", "Classic"
+    private String genre;
 
     /**
-     * Creates a new book with the given details.
-     * The book is set to available by default when first added.
+     * Creates a new book with all details provided.
+     * Calls the LibraryItem constructor (super) to set itemId, title, available.
      *
-     * @param bookId  unique book identifier
-     * @param title   title of the book
-     * @param author  author of the book
+     * @param bookId unique book identifier (e.g. "B001")
+     * @param title  title of the book
+     * @param author author of the book
+     * @param genre  genre/category of the book
      */
-    public Books(String bookId, String title, String author) {
-        // Assign the given bookId to this object's bookId attribute
-        this.bookId = bookId;
+    public Books(String bookId, String title, String author, String genre) {
+        // Call the parent LibraryItem constructor to set itemId, title, and available=true
+        super(bookId, title);
 
-        // Assign the given title to this object's title attribute
-        this.title = title;
-
-        // Assign the given author to this object's author attribute
+        // Store the author — this is specific to Books, not in LibraryItem
         this.author = author;
 
-        // A new book is always available when it is first added to the system
-        this.available = true;
+        // Store the genre — this is specific to Books, not in LibraryItem
+        this.genre = genre;
     }
 
     /**
      * Returns the pre-defined initial book data for the library.
-     * This method keeps the starting data inside the Books class
-     * so each class is responsible for its own data.
+     * Keeping this data here ensures the Books class owns its own defaults.
      *
      * @return array of Books objects pre-filled with default catalog entries
      */
@@ -70,71 +65,27 @@ public class Books {
         // Create an array that can hold 5 Books objects
         Books[] initial = new Books[5];
 
-        // Fill each slot with a pre-defined book using its ID, title, and author
-        initial[0] = new Books("B001", "The Great Gatsby",       "F. Scott Fitzgerald");
-        initial[1] = new Books("B002", "To Kill a Mockingbird",  "Harper Lee");
-        initial[2] = new Books("B003", "1984",                   "George Orwell");
-        initial[3] = new Books("B004", "Brave New World",        "Aldous Huxley");
-        initial[4] = new Books("B005", "The Catcher in the Rye", "J.D. Salinger");
+        // Fill each slot with a pre-defined book: ID, title, author, genre
+        initial[0] = new Books("B001", "The Great Gatsby",       "F. Scott Fitzgerald", "Classic");
+        initial[1] = new Books("B002", "To Kill a Mockingbird",  "Harper Lee",          "Fiction");
+        initial[2] = new Books("B003", "1984",                   "George Orwell",       "Dystopian");
+        initial[3] = new Books("B004", "Brave New World",        "Aldous Huxley",       "Sci-Fi");
+        initial[4] = new Books("B005", "The Catcher in the Rye", "J.D. Salinger",       "Fiction");
 
-        // Return the completed array to whoever called this method
+        // Return the completed array
         return initial;
     }
 
-    // ── Getters ───────────────────────────────────────────────────────────────
-    // Getters allow other classes to read private attributes safely
-    // without being able to change them directly
-
-    /** Returns the unique book ID. */
-    public String getBookId() { 
-        return bookId; 
-    }
-
-    /** Returns the title of the book. */
-    public String getTitle() { 
-        return title; 
-    }
-
-    /** Returns the author of the book. */
-    public String getAuthor() { 
-        return author; 
-    }
-
-    /** Returns true if the book is currently available to borrow. */
-    public boolean isAvailable() { 
-        return available; 
-    }
-
-    // ── Setters ───────────────────────────────────────────────────────────────
-    // Setters allow other classes to update private attributes in a controlled way
-
-    /** Updates the book ID. */
-    public void setBookId(String bookId) { 
-        this.bookId = bookId; 
-    }
-
-    /** Updates the title of the book. */
-    public void setTitle(String title) { 
-        this.title = title; 
-    }
-
-    /** Updates the author of the book. */
-    public void setAuthor(String author) { 
-        this.author = author; 
-    }
-
-    /** Sets whether the book is available (true) or borrowed (false). */
-    public void setAvailable(boolean available) { 
-        this.available = available; 
-    }
-
     /**
-     * Returns a readable summary of this book as a single String.
-     * This is used whenever a Books object is printed to the console.
-     * Example output: [B001] "The Great Gatsby" by F. Scott Fitzgerald (Available)
+     * Returns a detailed description of this book.
+     * OVERRIDES the base getInfo() in LibraryItem with book-specific details.
+     * The parent version only shows itemId, title, and status.
+     * This version also adds author and genre.
+     *
+     * @return a formatted string with full book details
      */
-    public String toString() {
-        // Determine the availability status as a word using if-else
+    public String getInfo() {
+        // Determine the availability status using if-else
         String status;
         if (available == true) {
             status = "Available";
@@ -142,7 +93,45 @@ public class Books {
             status = "Borrowed";
         }
 
-        // Build and return a formatted string showing the book ID, title, author, and status
-        return "[" + bookId + "] \"" + title + "\" by " + author + " (" + status + ")";
+        // Build a string that includes the book-specific fields
+        // available, itemId, title are accessed directly because they are protected in LibraryItem
+        return "[" + itemId + "] \"" + title + "\" by " + author
+                + " | Genre: " + genre
+                + " (" + status + ")";
     }
+
+    /**
+     * Returns a readable summary of this book.
+     * Calls the overridden getInfo() method from this class.
+     */
+    public String toString() {
+        // Delegates to getInfo() — which is the overridden version in Books
+        return getInfo();
+    }
+
+    // ── Getters ───────────────────────────────────────────────────────────────
+
+    /**
+     * Returns the book ID.
+     * This is an alias for getItemId() inherited from LibraryItem,
+     * kept for readability when working specifically with books.
+     */
+    public String getBookId() { return itemId; }
+
+    /** Returns the author of this book. */
+    public String getAuthor() { return author; }
+
+    /** Returns the genre/category of this book. */
+    public String getGenre() { return genre; }
+
+    // ── Setters ───────────────────────────────────────────────────────────────
+
+    /** Updates the book ID. */
+    public void setBookId(String bookId) { this.itemId = bookId; }
+
+    /** Updates the author of this book. */
+    public void setAuthor(String author) { this.author = author; }
+
+    /** Updates the genre/category of this book. */
+    public void setGenre(String genre) { this.genre = genre; }
 }
