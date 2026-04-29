@@ -20,20 +20,57 @@ import java.util.Scanner;
  * Entry point for the Library Borrowing System.
  *
  * This class starts the application by creating a Librarian object (which
- * automatically loads initial book and member data) and then presents a
- * menu-driven interface for the user to interact with the system.
+ * automatically loads initial book, multimedia, and member data) and then
+ * presents a two-level menu-driven interface.
  *
- * Menu operations available:
- *   Book Management   : Add, Remove, Update, View books
- *   Member Management : Register, Remove, Update, View members
- *   Borrow & Return   : Borrow a book, Return a book, Search by title
- *   Records           : View all borrow/return records
+ * Menu structure:
+ *   Level 1 (Main Menu) : Book Management, Multimedia Management,
+ *                         Member Management, Borrow and Return, Exit
+ *   Level 2 (Sub-menus) : specific actions for each section + Back option
+ *
+ * OOP concepts demonstrated:
+ *   Inheritance  : Books/Multimedia extend LibraryItem, Member/Librarian extend Person
+ *   Overriding   : getInfo() and toString() overridden in all subclasses
+ *   Overloading  : addBook (with/without genre), addMultimedia (with/without duration),
+ *                  searchItem (with/without keyword)
+ *   Encapsulation: all attributes private/protected, accessed via getters/setters
+ *
+ * @author      masjohncook
+ * @version     0.0.1
+ * @copyright   (C) Copyright 2026
+ * @license     None
+ * @maintainer  masjohncook
+ * @email       mas.john.cook@gmail.com
+ * @status      None
  */
 public class main {
 
     /**
-     * Main method — launches the library system and runs the menu loop.
-     * The loop continues until the user selects option 0 (Exit).
+     * Reads one integer from the Scanner.
+     * If the input is not a number, discards the line and returns -1
+     * so the caller can re-show the menu without crashing.
+     *
+     * @param sc the Scanner connected to keyboard input
+     * @return the integer the user typed, or -1 for invalid input
+     */
+    private static int readInt(Scanner sc) {
+        // Check whether the next token the user typed is an integer
+        if (sc.hasNextInt()) {
+            int value = sc.nextInt();   // read the integer value
+            sc.nextLine();              // consume the leftover newline after the number
+            return value;
+        } else {
+            sc.nextLine();              // discard the entire invalid line
+            System.out.println("  Please enter a number from the menu.");
+            return -1;                  // signal that the input was not a valid number
+        }
+    }
+
+    /**
+     * Main method — launches the library system and runs the two-level menu loop.
+     * The outer loop shows the main menu and runs until the user selects 0 (Exit).
+     * Each main menu option opens an inner loop for that section's sub-menu.
+     * Exit (0) is only available on the main menu; sub-menus use 0 as Back.
      *
      * @param args command-line arguments (not used)
      */
@@ -51,292 +88,481 @@ public class main {
         // Create a Scanner object to read input typed by the user on the keyboard
         Scanner sc = new Scanner(System.in);
 
-        // Create the Librarian object — the constructor inside Librarian
-        // automatically calls loadInitialData() to pre-fill books and members
+        // Create the Librarian — the constructor automatically loads initial data
+        // Librarian extends Person, so id and name are set via super()
         Librarian librarian = new Librarian("L001", "Mrs. Smith");
-
-        // Print a welcome message using the librarian's name
         System.out.println("=== Welcome, " + librarian.getName() + "! ===\n");
 
-        // choice stores the menu option the user picks each time
+        // mainChoice stores which section the user picks from the main menu
         // Start at -1 so the while loop begins immediately (since -1 != 0)
-        int choice = -1;
+        int mainChoice = -1;
 
-        // Keep showing the menu and processing choices until the user types 0 (Exit)
-        while (choice != 0) {
+        // ── LEVEL 1: Main Menu ────────────────────────────────────────────────────
+        // Keep showing the main menu until the user types 0 (Exit)
+        while (mainChoice != 0) {
 
-            // Print the full menu to the console
             System.out.println("\n============================================");
             System.out.println("          LIBRARY BORROWING SYSTEM         ");
             System.out.println("============================================");
-            System.out.println(" --- Book Management ---");
-            System.out.println("  1. Add Book");
-            System.out.println("  2. Remove Book");
-            System.out.println("  3. Update Book");
-            System.out.println("  4. View All Books");
-            System.out.println(" --- Member Management ---");
-            System.out.println("  5. Register Member");
-            System.out.println("  6. Remove Member");
-            System.out.println("  7. Update Member Name");
-            System.out.println("  8. View All Members");
-            System.out.println(" --- Borrow & Return ---");
-            System.out.println("  9. Borrow Book");
-            System.out.println(" 10. Return Book");
-            System.out.println(" 11. Search Book by Title");
-            System.out.println(" 12. View All Borrow Records");
+            System.out.println("  1. Book Management");
+            System.out.println("  2. Multimedia Management");
+            System.out.println("  3. Member Management");
+            System.out.println("  4. Borrow & Return");
             System.out.println("--------------------------------------------");
             System.out.println("  0. Exit");
             System.out.println("============================================");
             System.out.print("Enter choice: ");
 
-            // Try to read an integer from the user's input
-            // hasNextInt() returns true only if the user typed a number
-            if (sc.hasNextInt()) {
-                choice = sc.nextInt();    // read the number the user typed
-                sc.nextLine();            // consume the leftover newline character after the number
-            } else {
-                sc.nextLine();            // discard the invalid non-numeric input
-                System.out.println("  Please enter a number from the menu.");
-                continue;                 // skip the switch block and show the menu again
-            }
+            // Read the main menu choice — returns -1 if input is not a number
+            mainChoice = readInt(sc);
 
-            // Use switch-case to run the correct operation based on the user's choice
-            switch (choice) {
+            switch (mainChoice) {
 
-                // ── 1. Add Book ───────────────────────────────────────────────
+                // ── 1. Book Management sub-menu ───────────────────────────────────
                 case 1:
-                    // Ask the user to enter the details for the new book
-                    System.out.print("  Book ID   : ");
-                    String newId = sc.nextLine().trim();     // trim() removes extra spaces
+                    // bookChoice stores the user's pick inside the Book Management sub-menu
+                    // Start at -1 so the inner loop runs at least once
+                    int bookChoice = -1;
 
-                    System.out.print("  Title     : ");
-                    String newTitle = sc.nextLine().trim();
+                    // Keep showing the Book Management menu until the user types 0 (Back)
+                    while (bookChoice != 0) {
 
-                    System.out.print("  Author    : ");
-                    String newAuthor = sc.nextLine().trim();
+                        System.out.println("\n--------------------------------------------");
+                        System.out.println("          BOOK MANAGEMENT                  ");
+                        System.out.println("--------------------------------------------");
+                        System.out.println("  1. Add Book (with Genre)");
+                        System.out.println("  2. Add Book (default Genre: General)");
+                        System.out.println("  3. Remove Book");
+                        System.out.println("  4. Update Book");
+                        System.out.println("  5. View All Books");
+                        System.out.println("--------------------------------------------");
+                        System.out.println("  0. Back");
+                        System.out.println("--------------------------------------------");
+                        System.out.print("Enter choice: ");
 
-                    // Use if-else to validate that all fields are filled in
-                    if (newId.isEmpty() || newTitle.isEmpty() || newAuthor.isEmpty()) {
-                        // isEmpty() returns true if the string has no characters
-                        System.out.println("  [FAILED] All fields are required.");
-                    } else {
-                        // All fields are valid — ask the librarian to add the book
-                        librarian.addBook(newId, newTitle, newAuthor);
+                        // Read the sub-menu choice
+                        bookChoice = readInt(sc);
+
+                        switch (bookChoice) {
+
+                            // ── 1. Add Book (with Genre) — calls addBook(id, title, author, genre)
+                            case 1:
+                                System.out.print("  Book ID  : ");
+                                String b1Id = sc.nextLine().trim();
+                                System.out.print("  Title    : ");
+                                String b1Title = sc.nextLine().trim();
+                                System.out.print("  Author   : ");
+                                String b1Author = sc.nextLine().trim();
+                                System.out.print("  Genre    : ");
+                                String b1Genre = sc.nextLine().trim();
+
+                                // Validate all fields are provided
+                                if (b1Id.isEmpty() || b1Title.isEmpty() || b1Author.isEmpty() || b1Genre.isEmpty()) {
+                                    System.out.println("  [FAILED] All fields are required.");
+                                } else {
+                                    // Calls the 4-argument overload of addBook (with genre)
+                                    librarian.addBook(b1Id, b1Title, b1Author, b1Genre);
+                                }
+                                break;
+
+                            // ── 2. Add Book (default Genre) — calls addBook(id, title, author)
+                            case 2:
+                                System.out.print("  Book ID  : ");
+                                String b2Id = sc.nextLine().trim();
+                                System.out.print("  Title    : ");
+                                String b2Title = sc.nextLine().trim();
+                                System.out.print("  Author   : ");
+                                String b2Author = sc.nextLine().trim();
+
+                                if (b2Id.isEmpty() || b2Title.isEmpty() || b2Author.isEmpty()) {
+                                    System.out.println("  [FAILED] All fields are required.");
+                                } else {
+                                    // Calls the 3-argument overload of addBook (genre defaults to "General")
+                                    librarian.addBook(b2Id, b2Title, b2Author);
+                                }
+                                break;
+
+                            // ── 3. Remove Book ────────────────────────────────────────────────
+                            case 3:
+                                librarian.displayCatalog();
+                                System.out.print("  Enter Book ID to remove: ");
+                                String removeBookId = sc.nextLine().trim();
+                                librarian.removeBook(removeBookId);
+                                break;
+
+                            // ── 4. Update Book ────────────────────────────────────────────────
+                            case 4:
+                                librarian.displayCatalog();
+                                System.out.print("  Enter Book ID to update: ");
+                                String updateBookId = sc.nextLine().trim();
+                                System.out.print("  New Title  (Enter to keep current): ");
+                                String updatedTitle = sc.nextLine();
+                                System.out.print("  New Author (Enter to keep current): ");
+                                String updatedAuthor = sc.nextLine();
+                                System.out.print("  New Genre  (Enter to keep current): ");
+                                String updatedGenre = sc.nextLine();
+                                librarian.updateBook(updateBookId, updatedTitle, updatedAuthor, updatedGenre);
+                                break;
+
+                            // ── 5. View All Books ─────────────────────────────────────────────
+                            case 5:
+                                librarian.displayCatalog();
+                                break;
+
+                            // ── 0. Back — return to main menu ─────────────────────────────────
+                            case 0:
+                                System.out.println("  Returning to main menu...");
+                                break;
+
+                            // ── Invalid input inside Book Management ──────────────────────────
+                            default:
+                                if (bookChoice != -1) {
+                                    // Only print this message if the input was a number (not -1 from readInt)
+                                    System.out.println("  Invalid choice. Please enter a number from the menu.");
+                                }
+                        }
                     }
-                    break; // exit this case and go back to the menu
+                    break;
 
-                // ── 2. Remove Book ────────────────────────────────────────────
+                // ── 2. Multimedia Management sub-menu ─────────────────────────────
                 case 2:
-                    // Show the current catalog so the user can see available book IDs
-                    librarian.displayCatalog();
+                    // multimediaChoice stores the user's pick inside the Multimedia sub-menu
+                    int multimediaChoice = -1;
 
-                    System.out.print("  Enter Book ID to remove: ");
-                    String removeBookId = sc.nextLine().trim();
+                    // Keep showing the Multimedia Management menu until the user types 0 (Back)
+                    while (multimediaChoice != 0) {
 
-                    // Ask the librarian to remove the book with the given ID
-                    librarian.removeBook(removeBookId);
+                        System.out.println("\n--------------------------------------------");
+                        System.out.println("          MULTIMEDIA MANAGEMENT            ");
+                        System.out.println("--------------------------------------------");
+                        System.out.println("  1. Add Multimedia (with Duration)");
+                        System.out.println("  2. Add Multimedia (default Duration: Unknown)");
+                        System.out.println("  3. Remove Multimedia");
+                        System.out.println("  4. Update Multimedia");
+                        System.out.println("  5. View All Multimedia");
+                        System.out.println("--------------------------------------------");
+                        System.out.println("  0. Back");
+                        System.out.println("--------------------------------------------");
+                        System.out.print("Enter choice: ");
+
+                        // Read the sub-menu choice
+                        multimediaChoice = readInt(sc);
+
+                        switch (multimediaChoice) {
+
+                            // ── 1. Add Multimedia (with Duration) — calls addMultimedia(id, title, type, duration)
+                            case 1:
+                                System.out.print("  Item ID  : ");
+                                String m1Id = sc.nextLine().trim();
+                                System.out.print("  Title    : ");
+                                String m1Title = sc.nextLine().trim();
+                                System.out.print("  Type (DVD/CD/Audiobook): ");
+                                String m1Type = sc.nextLine().trim();
+                                System.out.print("  Duration : ");
+                                String m1Duration = sc.nextLine().trim();
+
+                                if (m1Id.isEmpty() || m1Title.isEmpty() || m1Type.isEmpty() || m1Duration.isEmpty()) {
+                                    System.out.println("  [FAILED] All fields are required.");
+                                } else {
+                                    // Calls the 4-argument overload of addMultimedia (with duration)
+                                    librarian.addMultimedia(m1Id, m1Title, m1Type, m1Duration);
+                                }
+                                break;
+
+                            // ── 2. Add Multimedia (default Duration) — calls addMultimedia(id, title, type)
+                            case 2:
+                                System.out.print("  Item ID  : ");
+                                String m2Id = sc.nextLine().trim();
+                                System.out.print("  Title    : ");
+                                String m2Title = sc.nextLine().trim();
+                                System.out.print("  Type (DVD/CD/Audiobook): ");
+                                String m2Type = sc.nextLine().trim();
+
+                                if (m2Id.isEmpty() || m2Title.isEmpty() || m2Type.isEmpty()) {
+                                    System.out.println("  [FAILED] All fields are required.");
+                                } else {
+                                    // Calls the 3-argument overload of addMultimedia (duration defaults to "Unknown")
+                                    librarian.addMultimedia(m2Id, m2Title, m2Type);
+                                }
+                                break;
+
+                            // ── 3. Remove Multimedia ──────────────────────────────────────────
+                            case 3:
+                                librarian.displayMultimedia();
+                                System.out.print("  Enter Item ID to remove: ");
+                                String removeItemId = sc.nextLine().trim();
+                                librarian.removeMultimedia(removeItemId);
+                                break;
+
+                            // ── 4. Update Multimedia ──────────────────────────────────────────
+                            case 4:
+                                librarian.displayMultimedia();
+                                System.out.print("  Enter Item ID to update: ");
+                                String updateItemId = sc.nextLine().trim();
+                                System.out.print("  New Title    (Enter to keep current): ");
+                                String updatedMTitle = sc.nextLine();
+                                System.out.print("  New Type     (Enter to keep current): ");
+                                String updatedMType = sc.nextLine();
+                                System.out.print("  New Duration (Enter to keep current): ");
+                                String updatedMDuration = sc.nextLine();
+                                librarian.updateMultimedia(updateItemId, updatedMTitle, updatedMType, updatedMDuration);
+                                break;
+
+                            // ── 5. View All Multimedia ────────────────────────────────────────
+                            case 5:
+                                librarian.displayMultimedia();
+                                break;
+
+                            // ── 0. Back — return to main menu ─────────────────────────────────
+                            case 0:
+                                System.out.println("  Returning to main menu...");
+                                break;
+
+                            // ── Invalid input inside Multimedia Management ────────────────────
+                            default:
+                                if (multimediaChoice != -1) {
+                                    System.out.println("  Invalid choice. Please enter a number from the menu.");
+                                }
+                        }
+                    }
                     break;
 
-                // ── 3. Update Book ────────────────────────────────────────────
+                // ── 3. Member Management sub-menu ─────────────────────────────────
                 case 3:
-                    // Show the current catalog so the user can see which book to update
-                    librarian.displayCatalog();
+                    // memberChoice stores the user's pick inside the Member Management sub-menu
+                    int memberChoice = -1;
 
-                    System.out.print("  Enter Book ID to update: ");
-                    String updateBookId = sc.nextLine().trim();
+                    // Keep showing the Member Management menu until the user types 0 (Back)
+                    while (memberChoice != 0) {
 
-                    // Ask for a new title — pressing Enter without typing keeps the current one
-                    System.out.print("  New Title  (press Enter to keep current): ");
-                    String updatedTitle = sc.nextLine(); // do not trim — blank is intentional
+                        System.out.println("\n--------------------------------------------");
+                        System.out.println("          MEMBER MANAGEMENT                ");
+                        System.out.println("--------------------------------------------");
+                        System.out.println("  1. Register Member");
+                        System.out.println("  2. Remove Member");
+                        System.out.println("  3. Update Member Name");
+                        System.out.println("  4. View All Members");
+                        System.out.println("--------------------------------------------");
+                        System.out.println("  0. Back");
+                        System.out.println("--------------------------------------------");
+                        System.out.print("Enter choice: ");
 
-                    // Ask for a new author — pressing Enter without typing keeps the current one
-                    System.out.print("  New Author (press Enter to keep current): ");
-                    String updatedAuthor = sc.nextLine(); // do not trim — blank is intentional
+                        // Read the sub-menu choice
+                        memberChoice = readInt(sc);
 
-                    // Ask the librarian to update the book — empty strings will be skipped inside
-                    librarian.updateBook(updateBookId, updatedTitle, updatedAuthor);
+                        switch (memberChoice) {
+
+                            // ── 1. Register Member ────────────────────────────────────────────
+                            case 1:
+                                System.out.print("  Member ID : ");
+                                String newMemberId = sc.nextLine().trim();
+                                System.out.print("  Name      : ");
+                                String newMemberName = sc.nextLine().trim();
+
+                                if (newMemberId.isEmpty() || newMemberName.isEmpty()) {
+                                    System.out.println("  [FAILED] All fields are required.");
+                                } else {
+                                    librarian.registerMember(newMemberId, newMemberName);
+                                }
+                                break;
+
+                            // ── 2. Remove Member ──────────────────────────────────────────────
+                            case 2:
+                                librarian.displayMembers();
+                                System.out.print("  Enter Member ID to remove: ");
+                                String removeMemberId = sc.nextLine().trim();
+                                librarian.removeMember(removeMemberId);
+                                break;
+
+                            // ── 3. Update Member Name ─────────────────────────────────────────
+                            case 3:
+                                librarian.displayMembers();
+                                System.out.print("  Enter Member ID to update: ");
+                                String updateMemberId = sc.nextLine().trim();
+                                System.out.print("  New Name  : ");
+                                String updatedName = sc.nextLine().trim();
+                                librarian.updateMember(updateMemberId, updatedName);
+                                break;
+
+                            // ── 4. View All Members ───────────────────────────────────────────
+                            case 4:
+                                librarian.displayMembers();
+                                break;
+
+                            // ── 0. Back — return to main menu ─────────────────────────────────
+                            case 0:
+                                System.out.println("  Returning to main menu...");
+                                break;
+
+                            // ── Invalid input inside Member Management ────────────────────────
+                            default:
+                                if (memberChoice != -1) {
+                                    System.out.println("  Invalid choice. Please enter a number from the menu.");
+                                }
+                        }
+                    }
                     break;
 
-                // ── 4. View All Books ─────────────────────────────────────────
+                // ── 4. Borrow & Return sub-menu ───────────────────────────────────
                 case 4:
-                    // Display every book in the catalog with its availability status
-                    librarian.displayCatalog();
-                    break;
+                    // borrowChoice stores the user's pick inside the Borrow & Return sub-menu
+                    int borrowChoice = -1;
 
-                // ── 5. Register Member ────────────────────────────────────────
-                case 5:
-                    // Ask the user to enter details for the new member
-                    System.out.print("  Member ID : ");
-                    String newMemberId = sc.nextLine().trim();
+                    // Keep showing the Borrow & Return menu until the user types 0 (Back)
+                    while (borrowChoice != 0) {
 
-                    System.out.print("  Name      : ");
-                    String newMemberName = sc.nextLine().trim();
+                        System.out.println("\n--------------------------------------------");
+                        System.out.println("          BORROW & RETURN                  ");
+                        System.out.println("--------------------------------------------");
+                        System.out.println("  1. Borrow Item");
+                        System.out.println("  2. Return Item");
+                        System.out.println("  3. Search Item by Keyword");
+                        System.out.println("  4. Browse All Available Items");
+                        System.out.println("  5. View All Borrow Records");
+                        System.out.println("--------------------------------------------");
+                        System.out.println("  0. Back");
+                        System.out.println("--------------------------------------------");
+                        System.out.print("Enter choice: ");
 
-                    // Use if-else to validate that both fields are filled in
-                    if (newMemberId.isEmpty() || newMemberName.isEmpty()) {
-                        System.out.println("  [FAILED] All fields are required.");
-                    } else {
-                        // Both fields are valid — ask the librarian to register the member
-                        librarian.registerMember(newMemberId, newMemberName);
-                    }
-                    break;
+                        // Read the sub-menu choice
+                        borrowChoice = readInt(sc);
 
-                // ── 6. Remove Member ──────────────────────────────────────────
-                case 6:
-                    // Show all members so the user can see available member IDs
-                    librarian.displayMembers();
+                        switch (borrowChoice) {
 
-                    System.out.print("  Enter Member ID to remove: ");
-                    String removeMemberId = sc.nextLine().trim();
+                            // ── 1. Borrow Item ────────────────────────────────────────────────
+                            case 1:
+                                librarian.displayMembers();
+                                System.out.print("  Enter Member ID : ");
+                                String borrowMemberId = sc.nextLine().trim();
 
-                    // Ask the librarian to remove the member with the given ID
-                    librarian.removeMember(removeMemberId);
-                    break;
+                                // Search for the member by their ID
+                                Member borrower = librarian.findMemberById(borrowMemberId);
 
-                // ── 7. Update Member Name ─────────────────────────────────────
-                case 7:
-                    // Show all members so the user can see which one to update
-                    librarian.displayMembers();
+                                if (borrower == null) {
+                                    System.out.println("  [FAILED] Member not found.");
+                                } else {
+                                    // Show both books and multimedia so the member can pick any item
+                                    librarian.displayAllItems();
+                                    System.out.print("  Enter Item ID   : ");
+                                    String borrowItemId = sc.nextLine().trim();
 
-                    System.out.print("  Enter Member ID to update: ");
-                    String updateMemberId = sc.nextLine().trim();
+                                    // findItemById searches both books and multimedia catalogs
+                                    LibraryItem itemToBorrow = librarian.findItemById(borrowItemId);
 
-                    System.out.print("  New Name  : ");
-                    String updatedName = sc.nextLine().trim();
+                                    if (itemToBorrow == null) {
+                                        System.out.println("  [FAILED] Item not found.");
+                                    } else {
+                                        // borrowItem() is in Member — works for any LibraryItem
+                                        if (borrower.borrowItem(itemToBorrow)) {
+                                            // Only log the record if the borrow was successful
+                                            librarian.recordBorrow(borrower, itemToBorrow);
+                                        }
+                                    }
+                                }
+                                break;
 
-                    // Ask the librarian to update the member's name
-                    librarian.updateMember(updateMemberId, updatedName);
-                    break;
+                            // ── 2. Return Item ────────────────────────────────────────────────
+                            case 2:
+                                librarian.displayMembers();
+                                System.out.print("  Enter Member ID : ");
+                                String returnMemberId = sc.nextLine().trim();
+                                Member returner = librarian.findMemberById(returnMemberId);
 
-                // ── 8. View All Members ───────────────────────────────────────
-                case 8:
-                    // Display every registered member and their borrow count
-                    librarian.displayMembers();
-                    break;
+                                if (returner == null) {
+                                    System.out.println("  [FAILED] Member not found.");
+                                } else if (returner.getBorrowCount() == 0) {
+                                    // Member exists but has nothing to return
+                                    System.out.println("  " + returner.getName() + " has no borrowed items.");
+                                } else {
+                                    // Show the items this member currently has
+                                    System.out.println("  Items currently borrowed by " + returner.getName() + ":");
+                                    LibraryItem[] borrowed = returner.getBorrowedItems();
+                                    for (int i = 0; i < returner.getBorrowCount(); i++) {
+                                        System.out.println("    " + borrowed[i]);
+                                    }
+                                    System.out.print("  Enter Item ID to return: ");
+                                    String returnItemId = sc.nextLine().trim();
 
-                // ── 9. Borrow Book ────────────────────────────────────────────
-                case 9:
-                    // Show all members so the user can pick a member ID
-                    librarian.displayMembers();
+                                    // findItemById searches both catalogs
+                                    LibraryItem itemToReturn = librarian.findItemById(returnItemId);
 
-                    System.out.print("  Enter Member ID : ");
-                    String borrowMemberId = sc.nextLine().trim();
+                                    if (itemToReturn == null) {
+                                        System.out.println("  [FAILED] Item not found.");
+                                    } else {
+                                        // returnItem() is in Member — works for any LibraryItem
+                                        if (returner.returnItem(itemToReturn)) {
+                                            // Only update the record if the return was successful
+                                            librarian.recordReturn(returner, itemToReturn);
+                                        }
+                                    }
+                                }
+                                break;
 
-                    // Search for the member by their ID — returns null if not found
-                    Member borrower = librarian.findMemberById(borrowMemberId);
+                            // ── 3. Search Item by Keyword — calls searchItem(catalog, size, keyword)
+                            case 3:
+                                librarian.displayMembers();
+                                System.out.print("  Enter Member ID : ");
+                                String searchMemberId = sc.nextLine().trim();
+                                Member searcher = librarian.findMemberById(searchMemberId);
 
-                    // Use if-else to check whether the member was found
-                    if (borrower == null) {
-                        System.out.println("  [FAILED] Member not found.");
-                    } else {
-                        // Member found — now show the catalog so the user can pick a book
-                        librarian.displayCatalog();
+                                if (searcher == null) {
+                                    System.out.println("  [FAILED] Member not found.");
+                                } else {
+                                    System.out.print("  Enter keyword   : ");
+                                    String keyword = sc.nextLine().trim();
 
-                        System.out.print("  Enter Book ID   : ");
-                        String borrowBookId = sc.nextLine().trim();
+                                    // Calls the 3-argument overload of searchItem (WITH keyword)
+                                    // getAllItems() returns a combined array of books + multimedia
+                                    searcher.searchItem(librarian.getAllItems(), librarian.getAllItemsCount(), keyword);
+                                }
+                                break;
 
-                        // Search for the book by its ID — returns null if not found
-                        Books bookToBorrow = librarian.findBookById(borrowBookId);
+                            // ── 4. Browse All Available Items — calls searchItem(catalog, size)
+                            case 4:
+                                librarian.displayMembers();
+                                System.out.print("  Enter Member ID : ");
+                                String browseMemberId = sc.nextLine().trim();
+                                Member browser = librarian.findMemberById(browseMemberId);
 
-                        if (bookToBorrow == null) {
-                            System.out.println("  [FAILED] Book not found.");
-                        } else {
-                            // Both member and book exist — attempt to borrow
-                            // borrowBook() returns true if successful
-                            if (borrower.borrowBook(bookToBorrow)) {
-                                // Only create a borrow record if the borrow was successful
-                                librarian.recordBorrow(borrower, bookToBorrow);
-                            }
+                                if (browser == null) {
+                                    System.out.println("  [FAILED] Member not found.");
+                                } else {
+                                    // Calls the 2-argument overload of searchItem (WITHOUT keyword)
+                                    // Lists all currently available items instead of filtering by title
+                                    browser.searchItem(librarian.getAllItems(), librarian.getAllItemsCount());
+                                }
+                                break;
+
+                            // ── 5. View All Borrow Records ────────────────────────────────────
+                            case 5:
+                                librarian.displayAllRecords();
+                                break;
+
+                            // ── 0. Back — return to main menu ─────────────────────────────────
+                            case 0:
+                                System.out.println("  Returning to main menu...");
+                                break;
+
+                            // ── Invalid input inside Borrow & Return ──────────────────────────
+                            default:
+                                if (borrowChoice != -1) {
+                                    System.out.println("  Invalid choice. Please enter a number from the menu.");
+                                }
                         }
                     }
                     break;
 
-                // ── 10. Return Book ───────────────────────────────────────────
-                case 10:
-                    // Show all members so the user can pick a member ID
-                    librarian.displayMembers();
-
-                    System.out.print("  Enter Member ID : ");
-                    String returnMemberId = sc.nextLine().trim();
-
-                    // Search for the member by their ID
-                    Member returner = librarian.findMemberById(returnMemberId);
-
-                    if (returner == null) {
-                        // Member does not exist in the system
-                        System.out.println("  [FAILED] Member not found.");
-                    } else if (returner.getBorrowCount() == 0) {
-                        // Member exists but has no books to return
-                        System.out.println("  " + returner.getName() + " has no borrowed books.");
-                    } else {
-                        // Member exists and has books — show what they currently have
-                        System.out.println("  Books currently borrowed by " + returner.getName() + ":");
-
-                        // Get the array of books this member currently holds
-                        Books[] borrowed = returner.getBorrowedBooks();
-
-                        // Loop through only the active borrow slots (up to borrowCount)
-                        for (int i = 0; i < returner.getBorrowCount(); i++) {
-                            System.out.println("    " + borrowed[i]);
-                        }
-
-                        System.out.print("  Enter Book ID to return: ");
-                        String returnBookId = sc.nextLine().trim();
-
-                        // Search for the book in the full catalog by its ID
-                        Books bookToReturn = librarian.findBookById(returnBookId);
-
-                        if (bookToReturn == null) {
-                            System.out.println("  [FAILED] Book not found.");
-                        } else {
-                            // Attempt the return — returnBook() returns true if successful
-                            if (returner.returnBook(bookToReturn)) {
-                                // Only update the borrow record if the return was successful
-                                librarian.recordReturn(returner, bookToReturn);
-                            }
-                        }
-                    }
-                    break;
-
-                // ── 11. Search Book by Title ──────────────────────────────────
-                case 11:
-                    // Show all members so the user can pick who is searching
-                    librarian.displayMembers();
-
-                    System.out.print("  Enter Member ID : ");
-                    String searchMemberId = sc.nextLine().trim();
-
-                    // Search for the member by their ID
-                    Member searcher = librarian.findMemberById(searchMemberId);
-
-                    if (searcher == null) {
-                        System.out.println("  [FAILED] Member not found.");
-                    } else {
-                        System.out.print("  Enter keyword   : ");
-                        String keyword = sc.nextLine().trim();
-
-                        // Delegate the search to the member — pass the full catalog and its size
-                        // The member's searchBook() method loops through the catalog and prints matches
-                        searcher.searchBook(librarian.getCatalog(), librarian.getCatalogCount(), keyword);
-                    }
-                    break;
-
-                // ── 12. View All Borrow Records ───────────────────────────────
-                case 12:
-                    // Display all borrow/return records logged by the librarian
-                    librarian.displayAllRecords();
-                    break;
-
-                // ── 0. Exit ───────────────────────────────────────────────────
+                // ── 0. Exit — only available on the main menu ─────────────────────
                 case 0:
-                    // Print a goodbye message — the while loop will now stop because choice == 0
                     System.out.println("\n  Goodbye! Library system closed.");
                     break;
 
-                // ── Invalid Input ─────────────────────────────────────────────
+                // ── Invalid input on main menu ────────────────────────────────────
                 default:
-                    // The user typed a number that is not on the menu
-                    System.out.println("  Invalid choice. Please enter a number from the menu.");
+                    if (mainChoice != -1) {
+                        // Only print this message if the input was a number (not -1 from readInt)
+                        System.out.println("  Invalid choice. Please enter a number from the menu.");
+                    }
             }
         }
 
